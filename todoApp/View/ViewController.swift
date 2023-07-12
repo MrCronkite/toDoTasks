@@ -9,7 +9,8 @@ import UIKit
 
 final class ViewController: UIViewController {
     
-    var names = ["Vlad", "Dima", "Sergey"]
+    var names: [Task] = [.init(nameTasks: "Vlad", done: false), .init(nameTasks: "ALena", done: false),
+                         .init(nameTasks: "Dima", done: true)]
     
     let addButton: UIButton = {
         let view = UIButton()
@@ -102,15 +103,22 @@ extension ViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "\(ItemTableCell.self)", for: indexPath) as? ItemTableCell else { return UITableViewCell() }
+        let attributedText = NSMutableAttributedString(string: names[indexPath.row].nameTasks)
         
-        cell.nameItem.text = names[indexPath.row]
+        if names[indexPath.row].done == false {
+            cell.nameItem.attributedText = attributedText
+        } else {
+            let range = NSRange(location: 0, length: attributedText.length)
+            attributedText.addAttribute(NSAttributedString.Key.strikethroughStyle, value: NSUnderlineStyle.single.rawValue , range: range)
+            
+            cell.nameItem.attributedText = attributedText
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         names.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .left)
-        print(names)
     }
         
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
@@ -120,11 +128,20 @@ extension ViewController: UITableViewDataSource {
 
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let selectedCell = tableView.cellForRow(at: indexPath) as? ItemTableCell else { return }
+        let attributedText = NSMutableAttributedString(string: names[indexPath.row].nameTasks)
         
-        let selectedCell = tableView.cellForRow(at: indexPath) as? ItemTableCell
-        
-        selectedCell?.nameItem.text = "Hello"
-        
+        if names[indexPath.row].done == false {
+            names[indexPath.row].done = true
+            
+            let range = NSRange(location: 0, length: attributedText.length)
+            attributedText.addAttribute(NSAttributedString.Key.strikethroughStyle, value: NSUnderlineStyle.single.rawValue , range: range)
+            
+            selectedCell.nameItem.attributedText = attributedText
+        } else {
+            names[indexPath.row].done = false
+            selectedCell.nameItem.attributedText = attributedText
+        }
     }
 }
 
@@ -132,7 +149,8 @@ extension ViewController {
     @IBAction func addTask() {
         guard let text = textField.text else { return }
         if text != "" {
-            names.insert(text, at: 0)
+            let task = Task(nameTasks: text, done: false)
+            names.append(task)
             tableView.reloadData()
         } else { showAlert() }
     }

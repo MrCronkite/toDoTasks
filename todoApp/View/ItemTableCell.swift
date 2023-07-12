@@ -38,15 +38,8 @@ extension ItemTableCell {
             nameItem.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
         
-        let linePath = UIBezierPath()
-        linePath.move(to: CGPoint(x: 5, y: 20))
-        linePath.addLine(to: CGPoint(x: 200, y: 20))
-
-        let lineLayer = CAShapeLayer()
-        lineLayer.path = linePath.cgPath
-        lineLayer.strokeColor = UIColor.black.cgColor
-        lineLayer.lineWidth = 0.5
+       
         
-        contentView.layer.addSublayer(lineLayer)
+        //nameItem.layer.addSublayer(lineLayer)
     }
 }
