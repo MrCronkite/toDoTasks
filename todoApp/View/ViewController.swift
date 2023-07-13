@@ -9,8 +9,7 @@ import UIKit
 
 final class ViewController: UIViewController {
     
-    var names: [Task] = [.init(nameTasks: "Vlad", done: false), .init(nameTasks: "ALena", done: false),
-                         .init(nameTasks: "Dima", done: true)]
+    var presenter: Presenter!
     
     let addButton: UIButton = {
         let view = UIButton()
@@ -31,7 +30,6 @@ final class ViewController: UIViewController {
         view.placeholder = "What do you do?"
         return view
     }()
-    
     
     let tableView: UITableView = {
         let view = UITableView(frame: .zero, style: .plain)
@@ -87,25 +85,30 @@ extension ViewController {
        addButton.addTarget(self, action: #selector(addTask), for: .touchUpInside)
     }
     
-    func showAlert() {
+   private func alert() {
         let alert = UIAlertController(title: "", message: "Plase create a task", preferredStyle: .alert)
         let action = UIAlertAction(title: "Ok", style: .default)
         
         alert.addAction(action)
         present(alert, animated: true)
     }
+    
+    @IBAction private func addTask() {
+        guard let text = textField.text else { return }
+        presenter.setTasks(textTask: text)
+    }
 }
 
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        names.count
+        presenter.element.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "\(ItemTableCell.self)", for: indexPath) as? ItemTableCell else { return UITableViewCell() }
-        let attributedText = NSMutableAttributedString(string: names[indexPath.row].nameTasks)
+        let attributedText = NSMutableAttributedString(string: presenter.element[indexPath.row].nameTasks)
         
-        if names[indexPath.row].done == false {
+        if presenter.element[indexPath.row].done == false {
             cell.nameItem.attributedText = attributedText
         } else {
             let range = NSRange(location: 0, length: attributedText.length)
@@ -117,7 +120,7 @@ extension ViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        names.remove(at: indexPath.row)
+        presenter.element.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .left)
     }
         
@@ -129,29 +132,28 @@ extension ViewController: UITableViewDataSource {
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let selectedCell = tableView.cellForRow(at: indexPath) as? ItemTableCell else { return }
-        let attributedText = NSMutableAttributedString(string: names[indexPath.row].nameTasks)
+        let attributedText = NSMutableAttributedString(string: presenter.element[indexPath.row].nameTasks)
         
-        if names[indexPath.row].done == false {
-            names[indexPath.row].done = true
+        if presenter.element[indexPath.row].done == false {
+            presenter.element[indexPath.row].done = true
             
             let range = NSRange(location: 0, length: attributedText.length)
             attributedText.addAttribute(NSAttributedString.Key.strikethroughStyle, value: NSUnderlineStyle.single.rawValue , range: range)
             
             selectedCell.nameItem.attributedText = attributedText
         } else {
-            names[indexPath.row].done = false
+            presenter.element[indexPath.row].done = false
             selectedCell.nameItem.attributedText = attributedText
         }
     }
 }
 
-extension ViewController {
-    @IBAction func addTask() {
-        guard let text = textField.text else { return }
-        if text != "" {
-            let task = Task(nameTasks: text, done: false)
-            names.append(task)
-            tableView.reloadData()
-        } else { showAlert() }
+extension ViewController: ViewControllerProtocol {
+    func showTasks() {
+        tableView.reloadData()
+    }
+    
+    func showAlert() {
+        alert()
     }
 }

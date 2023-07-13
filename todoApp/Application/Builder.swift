@@ -14,6 +14,11 @@ protocol Builder {
 final class BuilderImpl: Builder {
     static func createViewModule() -> UIViewController {
         let view = ViewController()
+        let element: [Element] = [.init(nameTasks: "Go to the shop", done: false),
+                                  .init(nameTasks: "Buy Bread", done: false),
+                                  .init(nameTasks: "Drink Vodka", done: true)]
+        let presenter = PresenterImpl(view: view, element: element )
+        view.presenter = presenter
         return view
     }
 }
