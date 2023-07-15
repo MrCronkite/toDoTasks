@@ -9,35 +9,37 @@ import UIKit
 
 protocol ViewControllerProtocol: AnyObject {
     func showTasks()
-    func showAlert()
 }
 
 protocol Presenter: AnyObject {
-    var element: [Element] {get set}
+    var element: [Element] { get set }
+    init (view: ViewControllerProtocol, store: StorageManager)
     
-    init (view: ViewControllerProtocol, element: [Element])
     func setTasks(textTask: String)
+    func getTask()
 }
 
 final class PresenterImpl: Presenter {
     weak var view: ViewControllerProtocol?
-    var element: [Element]
+    var store: StorageManager
+    var element: [Element] = []
     
-    required init(view: ViewControllerProtocol, element: [Element]) {
+    required init(view: ViewControllerProtocol, store: StorageManager) {
         self.view = view
-        self.element = element
+        self.store = store
         
-        setTasks(textTask: "New Task")
+        getTask()
+    }
+    
+    func getTask() {
+        element = store.getElement(forKey: .keysTask) ?? [.init(nameTasks: "Set a task", done: true)]
+        view?.showTasks()
     }
     
     func setTasks(textTask: String) {
-        if textTask != "" {
-            let task = Element(nameTasks: textTask, done: false)
-            element.append(task)
-            self.view?.showTasks()
-        } else {
-            self.view?.showAlert()
-        }
-        self.view?.showTasks()
+        let task = Element(nameTasks: textTask, done: false)
+        element = store.getElement(forKey: .keysTask) ?? [.init(nameTasks: "hello", done: true)]
+        element.append(task)
+        view?.showTasks()
     }
 }

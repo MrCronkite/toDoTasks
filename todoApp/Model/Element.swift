@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Element {
+struct Element: Codable {
     let nameTasks: String
     var done: Bool
 }

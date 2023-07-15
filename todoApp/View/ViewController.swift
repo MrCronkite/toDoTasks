@@ -10,6 +10,7 @@ import UIKit
 final class ViewController: UIViewController {
     
     var presenter: Presenter!
+    var storage: StorageManager = StorageManagerImpl()
     
     let addButton: UIButton = {
         let view = UIButton()
@@ -95,7 +96,8 @@ extension ViewController {
     
     @IBAction private func addTask() {
         guard let text = textField.text else { return }
-        presenter.setTasks(textTask: text)
+        storage.set(presenter.element, forKey: .keysTask)
+        text != "" ? presenter.setTasks(textTask: text) : alert()
     }
 }
 
@@ -121,6 +123,7 @@ extension ViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         presenter.element.remove(at: indexPath.row)
+        storage.set(presenter.element, forKey: .keysTask)
         tableView.deleteRows(at: [indexPath], with: .left)
     }
         
@@ -141,9 +144,11 @@ extension ViewController: UITableViewDelegate {
             attributedText.addAttribute(NSAttributedString.Key.strikethroughStyle, value: NSUnderlineStyle.single.rawValue , range: range)
             
             selectedCell.nameItem.attributedText = attributedText
+            storage.set(presenter.element, forKey: .keysTask)
         } else {
             presenter.element[indexPath.row].done = false
             selectedCell.nameItem.attributedText = attributedText
+            storage.set(presenter.element, forKey: .keysTask)
         }
     }
 }
@@ -151,9 +156,5 @@ extension ViewController: UITableViewDelegate {
 extension ViewController: ViewControllerProtocol {
     func showTasks() {
         tableView.reloadData()
-    }
-    
-    func showAlert() {
-        alert()
     }
 }
